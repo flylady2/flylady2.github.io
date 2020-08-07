@@ -1,6 +1,6 @@
 ---
 layout: post
-title:      "**Rails ActionMailer Makes it Easy to Communicate**"
+title:      "Rails ActionMailer Makes it Easy to Communicate"
 date:       2019-09-18 00:47:44 +0000
 permalink:  rails_actionmailer_makes_it_easy_to_communicate
 ---
