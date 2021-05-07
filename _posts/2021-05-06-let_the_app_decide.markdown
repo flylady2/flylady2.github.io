@@ -1,0 +1,45 @@
+---
+layout: post
+title:      "Let the App Decide!"
+date:       2021-05-07 01:04:19 +0000
+permalink:  let_the_app_decide
+---
+
+
+My final project is an app that allows users to create surveys that they can use to poll people – for example, a group of friends on what restaurant they want to meet at for dinner (post-pandemic) or members of their book club on what book they want to read next. The user does not have to look at the responses and try to figure out the most popular choice themselves.  Instead, the app uses the principles of ranked choice voting to determine what the “winning” choice is. 
+
+**Ranked Choice Voting:**
+In ranked choice voting, voters rank candidates in terms of 1st place, 2nd place, 3rd place, etc.  If one candidate receives more than 50% of the 1st place votes, they are the winner.  If not, the system determines which candidate received the fewest number of 1st place votes.  That candidate is removed from consideration and the ballots of the voters who ranked that candidate in first place are updated with all of their other rankings upgraded one level.  Then all the ballots are counted again.  Because of the updated ballots, at least some of the remaining candidates will receive additional first place votes, so there will be another determination of whether any candidate has won more than 50% of the first-place votes.  This process can be repeated until there is a winner.  Ranked choice voting eliminates the need for run-off elections, as the system essentially conducts an instantaneous run-off.
+
+I wanted to create an app that carries out a similar process for the results of a survey.  I modeled my algorithm after the process described above, but I also had to deal with a couple of “edge” cases that are unlikely to occur in an election vote that involves hundreds or even millions of votes.  These include situations in which a candidate (or choice, as I call them) receives no first-place votes at all and cases in which two choices receive the same number of first place votes.
+
+**The Models:**
+I have 4 models in my app: Survey, Choice, Response and Ranking.
+They have the following relationships:  
+A survey has many choices and has many responses
+A choice belongs to a survey and has many rankings.
+A response belongs to a survey and has many rankings.
+A ranking belongs to a choice and to a response.
+  
+Rankings have a value attribute, which is an integer that can range from 1 (first-place) to whatever number corresponds to the number of choices in the survey.  
+Choices have a Boolean attribute called winner, which is set to false when they are created.
+Responses have a token attribute.  
+
+**The Token:**
+When the survey user sends an email to a respondent with the link to access the survey, the email includes a token.  Along with the survey rankings, the response form has fields for the token and the respondent’s email.  The respondent’s email address is encrypted within the token so that when the respondent submits a response, the program compares the decrypted token with their email address.  A response is only saved if the two match.  In addition, the token must be unique.  The use of a token makes it easier to restrict survey responses to people who were invited and to prevent them from submitting more than one response.
+
+**The Threshold:**
+When a user creates a survey, they fill in a box labeled threshold; this sets the number of responses required to trigger the calculation to determine a winner.  For example, if the user sets the threshold to 10, when the 10th response to a particular survey is saved the process to determine a winner will be set in motion.  The user can also trigger this themselves if some of the respondents are taking too long to fill out the survey.
+
+**Determining a Winner:**
+The process is the same after the initial round of voting and after choices have been removed and rankings updated (see [Flowchart](https://viewer.diagrams.net/?highlight=0000ff&edit=_blank&layers=1&nav=1&title=Untitled%20Diagram.drawio#R7Vxde5s2FP41eZ7twn2QABlftknXrWu3pmnXdTd7ZJANK0Ye4MTZr59kC9ucIzckAfJhX9kchCz0nvOeD0k%2BcU9nyzc5n8fvZSTSE%2BpEyxP37IRS4vpD9aEl10bCHLKWTPMkMrKt4CL5TxghNdJFEomi1rCUMi2TeV0YyiwTYbmWOWsZz3N5VW82kWn9V%2Bd8KpDgIuQpln5JojJeSwM63Mp%2FFsk0Nr9MCBut78x41diMpoh5JK92RO7rE%2Fc0l7Jcf5stT0WqZ6%2Baly%2B%2FXH9J331jb96eF%2F%2Fyz69%2B%2FfTbH4N1Zz%2Fd5pHNK%2BQiK%2B%2Fc9fly8qu%2FdLK%2F8lMRvfwUz9L4o3nEueTpwszXRcnz0rxweV3NoupKAaYuXl3FSSku5jzUd66U0ihZXM5SdUXU10mSpqcylfnqOTfyRRB5Sl6Uufwmdu4EdOwypu40fDkzCZciL8VyB1rzsm%2BEnIkyv1ZNzN2BZzTQaO6AEBqsJVdbRRh5a1G8owOeacaN6k03fW%2BnV30xM2yfbTr6e7n497w4m%2F4%2B%2FmP55mNM358PKJ7tRX4prtF0K1Wb669qVniailROcz5TczUXeaKGInJ478P2xs0ILUVlpzbEuAgmoQ0xFgZiPOkSMd994dcxG40YgowQ0iNmPsLsvcyFZrGYZyeUpWoAr8a5%2BjbV32Sm74WxTNT0Q1jzWM7Gi%2BLWVjSZTGhoxSRiY%2BZ3a0VBHZGAeRgRx8GIEOJ0BEmAIMF8lUUvtfNQV2HKiyIJ6xOcy0UWCf0jjroSkXIZ5mGZl7Gcyoynr7fSV2KZlH%2Fq1i8o9c31V93XC2KuzpZVZ%2FrieudixzZXsttBVchFHorvzEblaPVLfBfRHcB8C16VLBcpL5PLuvu0YWh%2B4YNM1HtsFKYy2I2%2BUKAG6xcyT%2B36K9AR8UBPwyHoSXmqqShRTyud2rz33dWMBFitblSUumJt27yTcm507x9RlteGgPmilHXNbFk7Rg2V456oD4gP0GKQkTtGa4RI4fM84qVYKb4KLXM9lLLMk%2FFiJZSTHZ5mfKYZOBsX8xUEkNUVSIrw84WF0mt4347WBVHh0dBG6yM2dLmm9YnMykrhbs8dt6B5FdgDa%2FMtPE8tvMG6onmCg9MeeX742GiePCqaV%2Bh4LRH9gDAQqQ8rQV9MT5Cm%2FcTTAlu7sqayrmB10810%2BFe3cyPiaTLNtJYqbVhF6do2E5WmvjQ3ZkkUpfsSrLoad0YCm5Btg6nnIBLwLEoFoW%2BPA3DK9MlGw88bmKoI82hgof4zCI3IsK%2FYCPKbXznbvvhtiKzoQnlO%2Fe4znujHdYBzUxBUmFqFsyh0NAVv8yxTAIdJNt0JuWCfxzrHKtiiIKlmrqXM4VJs0UO6X%2FvuR7Q4fn6tNaSlOuAkCIW9gjEOfM%2FvN7T1HVsJg%2BHZ7q4QiAMONSWprn9TZ5Lkhf6cp3yVmwA7y3n2TRlZoVtKndUIHsa42Tq1yRGCHScsXaFYKf7jSU%2BqbGQXQ5NOqkGVFkg2dGiuHB2L%2B1UuamCHDxktcLawQ0CfXlERgsmoBUzPUpnfcGL7aDKEJia%2FlpPN203vI0n8GEgRfJir3Zj2IRq%2BIQpSc86vd5rNdYPCMkI4pK0%2BrLtoNaaiOKY6xJyRAFP2A2zK%2FaYmeHUA0LKTSUyzwOk6l7IUz4JrB%2F6ojpA3ohbPaYk1uyNbF4c%2FR7K1po5DwLYexKR5kc0FXblBM%2FptizCrkR84YeIim%2Bfj5K9XynTdozk2MkcYt97ZGgkBpOwG%2FVaEXA9BfoB1VYTng1si3m1yJvSM60Hv21TyNBN65gILqMCoFWV8PPmdFWVcnALWtvo4q7099jrLNrgsY0ujibgSRYPazvOJOilcHrTi61uKbh2GnQ%2BwcehJ%2BjlcMnUJAKVx3EmHoCvqg646dnUe3kZwkHEnZWDRwbUsOvTq7TwchGB7fHLLil5TW763kcLkkECkurYsnMbjaGVPLXzlJh3oF%2FcVv%2Ff4xacZ%2BSjDA8BRy3p%2Bv4sZ1V552%2Fa5%2FSsPT3X%2BCWBC4uCDARtZL7Gnd1x%2BaMh6bluRCaxcU7%2FfepiHFxAOMAUfwK0QDx%2BV3LiAAL1UrEa1dmNFuEoYYYMfUsHXaZ%2BcL1Ke%2F4ip9AmmePBkCKENN7FsqLX9wzoPsGX4SdJoALLzIeC%2B5oc0QEc972zzcQh6gCQ68uG5OVtE0yuLVkn%2BAVQyLbOPS10j9sJSy4QhR3vTj5d0nm08H4z0YY1dADZe58Hieb9JPP%2FYShtdVyyIB8%2F3Qv1v7nZgT4T0G737TWrJhwgwBVzIRvfAGHXm9owy3hWNUT7Gk2r2qAedoM%2FuCDxalm26UbAt1BnOIg4wqESHFB58ax%2FDwT4644tOpew98vtYjvh2hh9cw%2FNs%2F6XRa5W52ip8dJo1ukP5w533FVn6cuGRoa7JE2cetrNmLZwtA4pzmGfJyAjWT5llLcm2z6Kzo2SV3z9a%2Bfctc7MzogUrpz3X3RjeqPZMjguisIc62KBGFnvy2X6daGpPZ8HFy29f30YfGI1%2B9t4xh399a%2FmPtlOehot0HfislhyeTS0HLe9tSjR9lHKs09%2FkrMKhsRkZopJndark1mk%2B7gpGP%2B1xmRXgo7uyoIL%2BiM%2B9o7NCPQXQ7XUML%2FZUR3gRKMRhQUv4Egcu73YMcINKbKjTi8hAcSzYrRxrFaZvks47KsAAlusIaftg774xm1%2FeOzI3uF%2F77au0dZTYHmE02LVw1OCbth7cOQLZC3rb%2BgtHTF3nuwPznOBe7e%2Btvupy%2B%2FfW6%2Bbbfwl3X%2F8P)).  The first decision point is to determine whether the survey has more than one choice remaining.  If there is only one, that choice is declared the winner.  If there is more than one choice, the first-place rankings for each remaining choice are collected and the next decision point is to determine whether any of the choices has more than 50% of the total of first-place votes.  If one of the choices does have a majority, it is declared the winner.  
+
+If there is no choice with more than 50% of the first-place votes, the next decision point is to determine whether any of the choices have no first-place votes.  If there is such a choice, it is destroyed.  The reason for this is that if another choice is removed and rankings are updated, a choice that previously had no first-place votes could then receive some.  
+
+The next decision point is to determine what number corresponds to the fewest first-place votes and whether only one choice has this number.  If there is only one, that choice is destroyed, rankings are updated and the process begins again.  If there are two or more choices “tied at the bottom”, the next step is to calculate each choice’s “score” - the overall value of all their rankings.  Because a first-place vote corresponds to 1, 2nd place to 2, etc., the higher its score, the less popular a choice is.  The next decision point is to determine if a choice has the highest (least popular) score.  If it does, that choice is destroyed, rankings are updated and the process begins again.  If more than one choice has the highest score, the one that has the lowest index in the array is chosen for destruction and rankings are updated.
+
+As the cycle repeats, you eventually end up with a winner, either the only remaining choice or a choice that has more than 50% of the first-place votes.  It was fun working out the logic and code needed to implement all these decision points and it gave me a lot of practice with nested arrays since almost all the methods have as arguments an array where each element is another array of a particular choice’s rankings.  There's gold in those nested arrays!
+
+
+
+
