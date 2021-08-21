@@ -1,15 +1,15 @@
 # Site settings
 title: Flylady Goes Binary
-header-img: img/home-bg.png
-email: flylady@mail.utexas.edu
+header-img: img/Theo.png
+email: lesliemstevens@protonmail.com
 copyright_name: flylady2
 description: > # this means to ignore newlines until "baseurl:"
-  An old biologist learns new tricks
+  From genetic code to computer code
 baseurl: "" # the subpath of your site, e.g. /blog
-twitter_username: 
+twitter_username:
 github_username:  flylady2
 learn_profile: flylady2
-email_username: flylady@mail.utexas.edu
+email_username: lesliemstevens@protonmail.com
 
 # Build settings
 markdown: kramdown
